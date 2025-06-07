@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36202.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoJobApplyAPI", "AutoJobApplyAPI\AutoJobApplyAPI.csproj", "{9CF46521-44AB-4ADE-AD45-E7E8757AF9BF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DAA1354D-10F2-4271-A19A-E94B5D18AB51} = {DAA1354D-10F2-4271-A19A-E94B5D18AB51}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoJobApplyDatabase", "AutoJobApplyDatabase\AutoJobApplyDatabase.csproj", "{DAA1354D-10F2-4271-A19A-E94B5D18AB51}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9CF46521-44AB-4ADE-AD45-E7E8757AF9BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CF46521-44AB-4ADE-AD45-E7E8757AF9BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CF46521-44AB-4ADE-AD45-E7E8757AF9BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CF46521-44AB-4ADE-AD45-E7E8757AF9BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAA1354D-10F2-4271-A19A-E94B5D18AB51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAA1354D-10F2-4271-A19A-E94B5D18AB51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAA1354D-10F2-4271-A19A-E94B5D18AB51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAA1354D-10F2-4271-A19A-E94B5D18AB51}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {294B156E-7F6B-4857-9F46-73E1A219F2F7}
+	EndGlobalSection
+EndGlobal

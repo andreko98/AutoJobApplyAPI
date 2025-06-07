@@ -1,0 +1,6 @@
+@AutoJobApplyAPI_HostAddress = http://localhost:5110
+
+GET {{AutoJobApplyAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
