@@ -12,10 +12,12 @@ namespace AutoJobApplyAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IEmailService _emailService;
 
-        public UsersController(AppDbContext context, IWebHostEnvironment env, IUserService userService)
+        public UsersController(AppDbContext context, IWebHostEnvironment env, IUserService userService, IEmailService emailService)
         {
             _userService = userService;
+            _emailService = emailService;
         }
 
         [HttpGet("{id}")]
@@ -44,14 +46,29 @@ namespace AutoJobApplyAPI.Controllers
             return NoContent();
         }
 
-        [HttpPost("{id}/upload")]
-        public async Task<IActionResult> UploadCurriculo(int id, IFormFile file)
+        [HttpPost("{id}/uploadCV")]
+        public async Task<IActionResult> UploadCV(int id, IFormFile file)
         {
-            var path = await _userService.UploadCurriculoAsync(id, file);
+            var path = await _userService.UploadCVAsync(id, file);
             if (path == null)
                 return BadRequest("Arquivo inválido ou usuário não encontrado.");
 
             return Ok(new { path });
+        }
+
+        [HttpPost("SaveEmailCredential")]
+        public async Task<IActionResult> SaveEmailCredential(int id, [FromBody] EmailCredentialRequest request)
+        {
+            var user = await _userService.GetByIdAsync(id);
+            if (user == null)
+                return NotFound("Usuário não encontrado.");
+
+            var result = await _emailService.SaveEmailCredential(id, request.Email, request.Password);
+
+            if (result)
+                return Ok("Credencial cadastrada com sucesso.");
+            else
+                return StatusCode(500, "Erro ao cadastrar credencial.");
         }
     }
 }

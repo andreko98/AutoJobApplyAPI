@@ -15,7 +15,7 @@ namespace AutoJobApplyDatabase.Repositories
 
         public async Task<User?> GetByIdAsync(int id)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            return await _context.Users.Include(u => u.EmailCredential).FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<User?> GetByEmailAsync(string email)

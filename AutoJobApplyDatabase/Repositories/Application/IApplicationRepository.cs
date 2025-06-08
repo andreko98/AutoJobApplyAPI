@@ -6,5 +6,6 @@ namespace AutoJobApplyDatabase.Repositories
     {
         Task AddAsync(Application application);
         Task<List<Application>> GetByUserIdAsync(int userId);
+        Task<List<Application>> GetRecentApplicationsAsync(int count);
     }
 }

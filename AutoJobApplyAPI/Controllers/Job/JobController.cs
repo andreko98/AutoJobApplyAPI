@@ -20,10 +20,17 @@ public class JobController : ControllerBase
         return Ok(jobs);
     }
 
-    [HttpPost("scrape")]
-    public async Task<ActionResult> Scrape([FromQuery] string termo = "desenvolvedor")
+    [HttpPost("scrape/{search}")]
+    public async Task<ActionResult> Scrape(string search)
     {
-        var total = await _jobService.ScrapeJobsAsync(termo);
+        var total = await _jobService.ScrapeJobsAsync(search);
         return Ok(new { total });
+    }
+
+    [HttpGet("recent/{count}")]
+    public async Task<ActionResult<IEnumerable<Job>>> GetRecentJobs(int count = 10)
+    {
+        var jobs = await _jobService.GetRecentJobsAsync(count);
+        return Ok(jobs);
     }
 }

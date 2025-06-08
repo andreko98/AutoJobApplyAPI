@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using AutoJobApplyDatabase.Entities;
+﻿using AutoJobApplyDatabase.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace AutoJobApplyDatabase.Context
 {
@@ -11,6 +12,8 @@ namespace AutoJobApplyDatabase.Context
         public DbSet<Job> Jobs { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<EmailLog> EmailLogs { get; set; }
+        public DbSet<ApiKey> ApiKeys { get; set; }
+        public DbSet<EmailCredential> EmailCredentials { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

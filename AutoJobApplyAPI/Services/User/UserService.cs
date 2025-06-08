@@ -1,8 +1,6 @@
 ﻿using AutoJobApplyAPI.Services.Interface;
 using AutoJobApplyDatabase.Entities;
 using AutoJobApplyDatabase.Repositories;
-using HtmlAgilityPack;
-using Microsoft.EntityFrameworkCore;
 
 namespace AutoJobApplyAPI.Services
 {
@@ -34,21 +32,21 @@ namespace AutoJobApplyAPI.Services
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null) return false;
 
-            user.Nome = updatedUser.Nome;
-            user.Sobrenome = updatedUser.Sobrenome;
+            user.Name = updatedUser.Name;
+            user.LastName = updatedUser.LastName;
             user.Email = updatedUser.Email;
-            user.DataNascimento = updatedUser.DataNascimento;
-            user.Endereco = updatedUser.Endereco;
-            user.Sobre = updatedUser.Sobre;
+            user.DateOfBirth = updatedUser.DateOfBirth;
+            user.Address = updatedUser.Address;
+            user.About = updatedUser.About;
 
-            if (!string.IsNullOrEmpty(updatedUser.CurriculoPath))
-                user.CurriculoPath = updatedUser.CurriculoPath;
+            if (!string.IsNullOrEmpty(updatedUser.CvPath))
+                user.CvPath = updatedUser.CvPath;
 
             await _userRepository.UpdateAsync(user);
             return true;
         }
 
-        public async Task<string?> UploadCurriculoAsync(int id, IFormFile file)
+        public async Task<string?> UploadCVAsync(int id, IFormFile file)
         {
             if (file.ContentType != "application/pdf")
                 return null;
@@ -56,17 +54,17 @@ namespace AutoJobApplyAPI.Services
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null) return null;
 
-            var folder = Path.Combine("Uploads", "Curriculos");
+            var folder = Path.Combine("Uploads", "CV");
             Directory.CreateDirectory(folder);
 
             var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
-            var relativePath = Path.Combine("Curriculos", fileName);
+            var relativePath = Path.Combine("CV", fileName);
             var fullPath = Path.Combine("Uploads", relativePath);
 
             using var stream = new FileStream(fullPath, FileMode.Create);
             await file.CopyToAsync(stream);
 
-            user.CurriculoPath = relativePath;
+            user.CvPath = relativePath;
             await _userRepository.UpdateAsync(user);
 
             return relativePath;

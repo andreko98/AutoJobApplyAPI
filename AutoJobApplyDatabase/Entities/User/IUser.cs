@@ -3,12 +3,12 @@
     public interface IUser
     {
         int Id { get; set; }
-        string Nome { get; set; }
-        string Sobrenome { get; set; }
+        string Name { get; set; }
+        string LastName { get; set; }
         string Email { get; set; }
-        DateTime DataNascimento { get; set; }
-        string Endereco { get; set; }
-        string Sobre { get; set; }
-        string CurriculoPath { get; set; }
+        DateTime DateOfBirth { get; set; }
+        string Address { get; set; }
+        string About { get; set; }
+        string CvPath { get; set; }
     }
 }

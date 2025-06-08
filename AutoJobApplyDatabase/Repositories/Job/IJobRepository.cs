@@ -8,5 +8,6 @@ namespace AutoJobApplyDatabase.Repositories
         Task AddRangeAsync(List<Job> jobs);
         Task<Job?> GetByIdAsync(int id);
         Task<bool> ExistsAsync(string title, string company, string location);
+        Task<List<Job>> GetRecentJobsAsync(int count);
     }
 }

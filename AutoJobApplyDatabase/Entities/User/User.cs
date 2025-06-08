@@ -9,12 +9,15 @@ namespace AutoJobApplyDatabase.Entities
     public class User : IUser
     {
         public int Id { get; set; }
-        public string Nome { get; set; }
-        public string Sobrenome { get; set; }
+        public string Name { get; set; }
+        public string LastName { get; set; }
         public string Email { get; set; }
-        public DateTime DataNascimento { get; set; }
-        public string Endereco { get; set; }
-        public string Sobre { get; set; }
-        public string CurriculoPath { get; set; }
+        public DateTime DateOfBirth { get; set; }
+        public string Address { get; set; }
+        public string About { get; set; }
+        public string CvPath { get; set; }
+        public int EmailCredentialId { get; set; }
+
+        public virtual EmailCredential EmailCredential { get; set; }
     }
 }

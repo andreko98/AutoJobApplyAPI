@@ -2,6 +2,7 @@
 {
     public interface IEmailService
     {
-        Task<bool> SendEmail(string fromEmail, string toCompany, string jobTitle, string message, string attachmentPath);
+        Task<bool> SendEmail(int userId, string toCompany, string jobTitle, string message, string attachmentPath);
+        Task<bool> SaveEmailCredential(int userId, string email, string password);
     }
 }

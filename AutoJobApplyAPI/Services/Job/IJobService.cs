@@ -6,5 +6,6 @@ namespace AutoJobApplyAPI.Services
     {
         Task<List<Job>> GetJobsAsync();
         Task<List<Job>> ScrapeJobsAsync(string termo);
+        Task<List<Job>> GetRecentJobsAsync(int count);
     }
 }

@@ -11,11 +11,11 @@ namespace AutoJobApplyDatabase.Entities
 
             builder.HasKey(u => u.Id);
 
-            builder.Property(u => u.Nome)
+            builder.Property(u => u.Name)
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.Property(u => u.Sobrenome)
+            builder.Property(u => u.LastName)
                 .IsRequired()
                 .HasMaxLength(100);
 
@@ -23,17 +23,24 @@ namespace AutoJobApplyDatabase.Entities
                 .IsRequired()
                 .HasMaxLength(200);
 
-            builder.Property(u => u.DataNascimento)
+            builder.Property(u => u.DateOfBirth)
                 .IsRequired();
 
-            builder.Property(u => u.Endereco)
+            builder.Property(u => u.Address)
                 .HasMaxLength(300);
 
-            builder.Property(u => u.Sobre)
+            builder.Property(u => u.About)
                 .HasMaxLength(2000);
 
-            builder.Property(u => u.CurriculoPath)
+            builder.Property(u => u.CvPath)
                 .HasMaxLength(500);
+
+            builder.Property(u => u.EmailCredentialId);
+
+            builder.HasOne(u => u.EmailCredential)
+                .WithOne(e => e.User)
+                .HasForeignKey<EmailCredential>(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

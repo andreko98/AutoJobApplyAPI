@@ -1,4 +1,5 @@
-﻿using AutoJobApplyDatabase.Entities;
+﻿using AutoJobApplyAPI.Services.Interface;
+using AutoJobApplyDatabase.Entities;
 using AutoJobApplyDatabase.Repositories;
 
 namespace AutoJobApplyAPI.Services
@@ -8,20 +9,20 @@ namespace AutoJobApplyAPI.Services
         private readonly IApplicationRepository _applicationRepository;
         private readonly IUserRepository _userRepository;
         private readonly IJobRepository _jobRepository;
-        private readonly OpenAiService _aiService;
-        private readonly EmailService _emailService;
+        private readonly IExternalApiService _externalApiService;
+        private readonly IEmailService _emailService;
 
         public ApplicationService(
             IApplicationRepository applicationRepository,
             IUserRepository userRepository,
             IJobRepository jobRepository,
-            OpenAiService aiService,
-            EmailService emailService)
+            IExternalApiService externalApiService,
+            IEmailService emailService)
         {
             _applicationRepository = applicationRepository;
             _userRepository = userRepository;
             _jobRepository = jobRepository;
-            _aiService = aiService;
+            _externalApiService = externalApiService;
             _emailService = emailService;
         }
 
@@ -33,8 +34,8 @@ namespace AutoJobApplyAPI.Services
             if (user == null || job == null)
                 throw new Exception("Usuário ou vaga não encontrado.");
 
-            var message = await _aiService.GenerateMessage(user, job);
-            var result = await _emailService.SendEmail(user.Email, job.Company, job.Title, message, user.CurriculoPath);
+            var message = await _externalApiService.GenerateMessageOpenAI(user, job);
+            var result = await _emailService.SendEmail(userId, job.Company, job.Title, message, user.CvPath);
 
             var application = new Application
             {
@@ -42,7 +43,7 @@ namespace AutoJobApplyAPI.Services
                 JobId = job.Id,
                 AppliedAt = DateTime.UtcNow,
                 MessageSent = message,
-                Status = result ? "Enviado" : "Erro"
+                Status = result ? ApplicationStatus.Enviado : ApplicationStatus.Erro
             };
 
             await _applicationRepository.AddAsync(application);
@@ -52,6 +53,11 @@ namespace AutoJobApplyAPI.Services
         public async Task<List<Application>> GetApplicationsByUserAsync(int userId)
         {
             return await _applicationRepository.GetByUserIdAsync(userId);
+        }
+
+        public async Task<List<Application>> GetRecentApplicationsAsync(int count)
+        {
+            return await _applicationRepository.GetRecentApplicationsAsync(count);
         }
     }
 }

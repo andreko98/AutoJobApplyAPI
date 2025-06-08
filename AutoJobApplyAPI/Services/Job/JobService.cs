@@ -289,5 +289,10 @@ namespace AutoJobApplyAPI.Services
 
             return vagas;
         }
+
+        public async Task<List<Job>> GetRecentJobsAsync(int count)
+        {
+            return await _jobRepository.GetRecentJobsAsync(count);
+        }
     }
 }

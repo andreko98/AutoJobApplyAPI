@@ -35,5 +35,13 @@ namespace AutoJobApplyDatabase.Repositories
                 j.Company == company &&
                 j.Location == location);
         }
+
+        public async Task<List<Job>> GetRecentJobsAsync(int count)
+        {
+            return await _context.Jobs
+                .OrderByDescending(j => j.DatePosted)
+                .Take(count)
+                .ToListAsync();
+        }
     }
 }

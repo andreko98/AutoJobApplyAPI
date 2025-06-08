@@ -27,6 +27,13 @@ namespace AutoJobApplyDatabase.Repositories
                 .OrderByDescending(a => a.AppliedAt)
                 .ToListAsync();
         }
-    }
 
+        public async Task<List<Application>> GetRecentApplicationsAsync(int count)
+        {
+            return await _context.Applications
+                .OrderByDescending(a => a.AppliedAt)
+                .Take(count)
+                .ToListAsync();
+        }
+    }
 }

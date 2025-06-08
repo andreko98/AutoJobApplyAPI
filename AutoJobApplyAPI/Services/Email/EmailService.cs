@@ -12,67 +12,106 @@ namespace AutoJobApplyAPI.Services
     {
         private readonly EmailSettings _settings;
         private readonly IEmailRepository _emailRepository;
+        private readonly DataProtectionService _dataProtectionService;
 
-        public EmailService(IOptions<EmailSettings> options, IEmailRepository emailRepository)
+        public EmailService(
+            IOptions<EmailSettings> options,
+            IEmailRepository emailRepository,
+            DataProtectionService dataProtectionService)
         {
             _settings = options.Value;
             _emailRepository = emailRepository;
+            _dataProtectionService = dataProtectionService;
         }
 
-        public async Task<bool> SendEmail(string fromEmail, string toCompany, string jobTitle, string message, string attachmentPath)
+        public async Task<bool> SendEmail(int userId, string toCompany, string jobTitle, string message, string attachmentPath)
         {
-            foreach (var pattern in _settings.EmailPatterns)
+            try
             {
-                var toEmail = pattern.Replace("{company}", toCompany.ToLower());
+                // Busca a senha criptografada do banco
+                var credential = _emailRepository.GetEmailCredential(userId);
+                if (credential == null)
+                    throw new Exception("Credencial de e-mail não encontrada.");
 
-                var emailLog = new EmailLog
-                {
-                    FromEmail = fromEmail,
-                    ToEmail = toEmail,
-                    Subject = $"Candidatura para vaga: {jobTitle}",
-                    Body = message,
-                    AttachmentPath = attachmentPath,
-                    SentAt = DateTime.UtcNow
-                };
+                // Descriptografa o email e senha
+                var senderEmail = _dataProtectionService.Unprotect(credential.Email);
+                var senderPassword = _dataProtectionService.Unprotect(credential.EncryptedPassword);
 
-                try
+                foreach (var pattern in _settings.EmailPatterns)
                 {
-                    var mail = new MailMessage
+                    var toEmail = pattern.Replace("{company}", toCompany.ToLower());
+
+                    var emailLog = new EmailLog
                     {
-                        From = new MailAddress(fromEmail),
-                        Subject = emailLog.Subject,
-                        Body = emailLog.Body
+                        FromEmail = senderEmail,
+                        ToEmail = toEmail,
+                        Subject = $"Candidatura para vaga: {jobTitle}",
+                        Body = message,
+                        AttachmentPath = attachmentPath,
+                        SentAt = DateTime.UtcNow
                     };
 
-                    mail.To.Add(toEmail);
-
-                    if (!string.IsNullOrEmpty(attachmentPath))
-                        mail.Attachments.Add(new Attachment(attachmentPath));
-
-                    using var smtp = new SmtpClient(_settings.SmtpHost)
+                    try
                     {
-                        Port = _settings.SmtpPort,
-                        Credentials = new NetworkCredential(fromEmail, _settings.SenderPassword),
-                        EnableSsl = true
-                    };
+                        var mail = new MailMessage
+                        {
+                            From = new MailAddress(senderEmail),
+                            Subject = emailLog.Subject,
+                            Body = emailLog.Body
+                        };
 
-                    await smtp.SendMailAsync(mail);
+                        mail.To.Add(toEmail);
 
-                    emailLog.Status = EmailStatus.Enviado;
-                    emailLog.Message = "E-mail enviado com sucesso.";
-                    await _emailRepository.AddAsync(emailLog);
+                        if (!string.IsNullOrEmpty(attachmentPath))
+                            mail.Attachments.Add(new Attachment(attachmentPath));
 
-                    return true;
+                        using var smtp = new SmtpClient(_settings.SmtpHost)
+                        {
+                            Port = _settings.SmtpPort,
+                            Credentials = new NetworkCredential(senderEmail, senderPassword),
+                            EnableSsl = true
+                        };
+
+                        await smtp.SendMailAsync(mail);
+
+                        emailLog.Status = EmailStatus.Enviado;
+                        emailLog.Message = "E-mail enviado com sucesso.";
+                        await _emailRepository.AddAsync(emailLog);
+                    }
+                    catch (Exception ex)
+                    {
+                        emailLog.Status = EmailStatus.Erro;
+                        emailLog.Message = ex.Message;
+                        await _emailRepository.AddAsync(emailLog);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    emailLog.Status = EmailStatus.Erro;
-                    emailLog.Message = ex.Message;
-                    await _emailRepository.AddAsync(emailLog);
-                }
+
+                return true;
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao enviar e-mail: {ex.Message}");
+                return false;
+            }
+        }
 
-            return false;
+        public async Task<bool> SaveEmailCredential(int userId, string email, string password)
+        {
+            // Criptografa email e senha
+            var encryptedEmail = _dataProtectionService.Protect(email);
+            var encryptedPassword = _dataProtectionService.Protect(password);
+
+            var credential = new EmailCredential
+            {
+                Email = encryptedEmail,
+                EncryptedPassword = encryptedPassword,
+                UserId = userId
+            };
+
+            // Salva no repositório
+            await _emailRepository.SaveEmailCredentialAsync(credential);
+            return true;
         }
     }
 }
+

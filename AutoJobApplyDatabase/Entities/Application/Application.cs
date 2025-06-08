@@ -15,8 +15,7 @@
 
     public enum ApplicationStatus
     {
-        Enviado,
-        Erro,
-        Pendente
+        Erro = 0,
+        Enviado = 1
     }
 }

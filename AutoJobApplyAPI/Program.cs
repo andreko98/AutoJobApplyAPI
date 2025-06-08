@@ -3,14 +3,13 @@ using AutoJobApplyAPI.Services;
 using AutoJobApplyAPI.Services.Interface;
 using AutoJobApplyDatabase.Context;
 using AutoJobApplyDatabase.Repositories;
+using AutoJobApplyDatabase.Repositories.ApiKey;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configurações de conexão com banco (appsettings.json)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection"); 
-
-builder.Services.Configure<OpenAiSettings>(builder.Configuration.GetSection("OpenAI"));
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -23,14 +22,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Injeção dos repositórios
+builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-// Configurações da OpenAI
-builder.Services.AddHttpClient();
-builder.Services.Configure<OpenAiSettings>(builder.Configuration.GetSection("OpenAI"));
 
 // Configurações de email
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
@@ -39,8 +35,12 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJobService, JobService>();
-builder.Services.AddScoped<IOpenAIService, OpenAiService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddDataProtection();
+builder.Services.AddScoped<DataProtectionService>();
+
+builder.Services.AddHttpClient<IExternalApiService, ExternalApiService>();
 
 var app = builder.Build();
 

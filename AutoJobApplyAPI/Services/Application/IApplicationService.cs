@@ -6,5 +6,6 @@ namespace AutoJobApplyAPI.Services
     {
         Task<Application> ApplyAsync(int userId, int jobId);
         Task<List<Application>> GetApplicationsByUserAsync(int userId);
+        Task<List<Application>> GetRecentApplicationsAsync(int count);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoJobApplyAPI.Services;
+using AutoJobApplyDatabase.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -30,6 +31,13 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> GetByUser(int userId)
     {
         var applications = await _applicationService.GetApplicationsByUserAsync(userId);
+        return Ok(applications);
+    }
+
+    [HttpGet("recent/{count}")]
+    public async Task<ActionResult<IEnumerable<Application>>> GetRecentApplications(int count = 10)
+    {
+        var applications = await _applicationService.GetRecentApplicationsAsync(count);
         return Ok(applications);
     }
 }
