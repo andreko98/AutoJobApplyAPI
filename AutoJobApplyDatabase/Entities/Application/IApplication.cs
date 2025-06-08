@@ -13,9 +13,9 @@ namespace AutoJobApplyDatabase.Entities
         int JobId { get; set; }
         DateTime AppliedAt { get; set; }
         string MessageSent { get; set; }
-        string Status { get; set; } // e.g. Enviado, Erro, Pendente
+        ApplicationStatus Status { get; set; }
 
-        //public User User { get; set; }
+        User User { get; set; }
         Job Job { get; set; }
     }
 }

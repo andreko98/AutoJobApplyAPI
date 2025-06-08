@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AutoJobApplyDatabase.Entities
+﻿namespace AutoJobApplyDatabase.Entities
 {
     public class Application : IApplication
     {
@@ -13,9 +7,16 @@ namespace AutoJobApplyDatabase.Entities
         public int JobId { get; set; }
         public DateTime AppliedAt { get; set; }
         public string MessageSent { get; set; }
-        public string Status { get; set; } // e.g. Enviado, Erro, Pendente
+        public ApplicationStatus Status { get; set; }
 
-        //public User User { get; set; }
+        public virtual User User { get; set; }
         public virtual Job Job { get; set; }
+    }
+
+    public enum ApplicationStatus
+    {
+        Enviado,
+        Erro,
+        Pendente
     }
 }
