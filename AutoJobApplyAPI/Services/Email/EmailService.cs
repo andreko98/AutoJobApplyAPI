@@ -37,9 +37,9 @@ namespace AutoJobApplyAPI.Services
                 var senderEmail = _dataProtectionService.Unprotect(credential.Email);
                 var senderPassword = _dataProtectionService.Unprotect(credential.EncryptedPassword);
 
-                foreach (var pattern in _settings.EmailPatterns)
+                var tasks = _settings.EmailPatterns.Select(async pattern =>
                 {
-                    var toEmail = pattern.Replace("{company}", toCompany.ToLower());
+                    var toEmail = pattern.Replace("{company}", toCompany.ToLower().Trim());
 
                     var emailLog = new EmailLog
                     {
@@ -53,7 +53,7 @@ namespace AutoJobApplyAPI.Services
 
                     try
                     {
-                        var mail = new MailMessage
+                        using var mail = new MailMessage
                         {
                             From = new MailAddress(senderEmail),
                             Subject = emailLog.Subject,
@@ -84,7 +84,9 @@ namespace AutoJobApplyAPI.Services
                         emailLog.Message = ex.Message;
                         await _emailRepository.AddAsync(emailLog);
                     }
-                }
+                });
+
+                await Task.WhenAll(tasks);
 
                 return true;
             }

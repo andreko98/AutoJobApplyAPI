@@ -1,4 +1,5 @@
-﻿using AutoJobApplyAPI.Services.Interface;
+﻿using AutoJobApplyAPI.Models;
+using AutoJobApplyAPI.Services.Interface;
 using AutoJobApplyDatabase.Context;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,14 +17,20 @@ namespace AutoJobApplyAPI.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] string email)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var user = await _userService.GetByEmailAsync(email);
+            var user = await _userService.GetByEmailAsync(request.Email);
+
+            const string genericError = "E-mail ou senha incorretos";
+
             if (user == null)
-                return NotFound(new { message = "Usuário não encontrado." });
+                return Unauthorized(new { message = genericError });
+
+            var isValid = await _userService.ValidatePasswordAsync(user.Id, request.Password);
+            if (!isValid)
+                return Unauthorized(new { message = genericError });
 
             return Ok(user);
         }
-
     }
 }

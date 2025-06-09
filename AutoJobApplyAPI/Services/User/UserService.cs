@@ -1,15 +1,20 @@
 ﻿using AutoJobApplyAPI.Services.Interface;
 using AutoJobApplyDatabase.Entities;
 using AutoJobApplyDatabase.Repositories;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 
 namespace AutoJobApplyAPI.Services
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        public UserService(IUserRepository userRepository)
+        private readonly DataProtectionService _dataProtectionService;
+
+        public UserService(IUserRepository userRepository,
+            DataProtectionService dataProtectionService)
         {
             _userRepository = userRepository;
+            _dataProtectionService = dataProtectionService;
         }
 
         public async Task<User?> GetByIdAsync(int id)
@@ -24,6 +29,8 @@ namespace AutoJobApplyAPI.Services
 
         public async Task<User> CreateUserAsync(User user)
         {
+            user.Password = _dataProtectionService.Protect(user.Password);
+
             return await _userRepository.AddAsync(user);
         }
 
@@ -35,6 +42,7 @@ namespace AutoJobApplyAPI.Services
             user.Name = updatedUser.Name;
             user.LastName = updatedUser.LastName;
             user.Email = updatedUser.Email;
+            user.Password = _dataProtectionService.Protect(updatedUser.Password);
             user.DateOfBirth = updatedUser.DateOfBirth;
             user.Address = updatedUser.Address;
             user.About = updatedUser.About;
@@ -68,6 +76,26 @@ namespace AutoJobApplyAPI.Services
             await _userRepository.UpdateAsync(user);
 
             return relativePath;
+        }
+
+        public async Task<bool> ValidatePasswordAsync(int userId, string password)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null || string.IsNullOrEmpty(user.Password))
+                return false;
+
+            try
+            {
+                // Descriptografa a senha armazenada
+                var decryptedPassword = _dataProtectionService.Unprotect(user.Password);
+                // Compara com a senha informada
+                return decryptedPassword == password;
+            }
+            catch
+            {
+                // Caso a descriptografia falhe, considera inválido
+                return false;
+            }
         }
     }
 }

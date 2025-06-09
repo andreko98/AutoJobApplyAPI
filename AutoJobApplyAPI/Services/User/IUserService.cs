@@ -9,5 +9,6 @@ namespace AutoJobApplyAPI.Services.Interface
         Task<User> CreateUserAsync(User user);
         Task<bool> UpdateUserAsync(int id, User updatedUser);
         Task<string?> UploadCVAsync(int id, IFormFile file);
+        Task<bool> ValidatePasswordAsync(int userId, string password);
     }
 }
