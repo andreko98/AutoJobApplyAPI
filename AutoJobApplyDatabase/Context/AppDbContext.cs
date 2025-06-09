@@ -21,6 +21,8 @@ namespace AutoJobApplyDatabase.Context
             modelBuilder.ApplyConfiguration(new JobMap());
             modelBuilder.ApplyConfiguration(new UserMap());
             modelBuilder.ApplyConfiguration(new EmailLogMap());
+            modelBuilder.ApplyConfiguration(new ApiKeyMap());
+            modelBuilder.ApplyConfiguration(new EmailCredentialsMap());
         }
     }
 }

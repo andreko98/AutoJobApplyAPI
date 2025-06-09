@@ -25,7 +25,7 @@ namespace AutoJobApplyDatabase.Entities
 
             builder.Property(u => u.Password)
                 .IsRequired()
-                .HasMaxLength(200);
+                .HasMaxLength(1000);
 
             builder.Property(u => u.DateOfBirth)
                 .IsRequired();
