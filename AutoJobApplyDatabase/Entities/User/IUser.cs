@@ -11,5 +11,8 @@
         string Address { get; set; }
         string About { get; set; }
         string CvPath { get; set; }
+        int? EmailCredentialId { get; set; }
+
+        EmailCredential? EmailCredential { get; set; }
     }
 }

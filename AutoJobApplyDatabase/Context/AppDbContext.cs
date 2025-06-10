@@ -12,7 +12,7 @@ namespace AutoJobApplyDatabase.Context
         public DbSet<Job> Jobs { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<EmailLog> EmailLogs { get; set; }
-        public DbSet<ApiKey> ApiKeys { get; set; }
+        public DbSet<ExternalApiKey> ExternalApiKeys { get; set; }
         public DbSet<EmailCredential> EmailCredentials { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -21,7 +21,7 @@ namespace AutoJobApplyDatabase.Context
             modelBuilder.ApplyConfiguration(new JobMap());
             modelBuilder.ApplyConfiguration(new UserMap());
             modelBuilder.ApplyConfiguration(new EmailLogMap());
-            modelBuilder.ApplyConfiguration(new ApiKeyMap());
+            modelBuilder.ApplyConfiguration(new ExternalApiKeyMap());
             modelBuilder.ApplyConfiguration(new EmailCredentialsMap());
         }
     }

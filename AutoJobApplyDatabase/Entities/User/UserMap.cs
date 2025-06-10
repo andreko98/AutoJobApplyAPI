@@ -11,6 +11,9 @@ namespace AutoJobApplyDatabase.Entities
 
             builder.HasKey(u => u.Id);
 
+            builder.Property(u => u.Id)
+           .HasAnnotation("SqlServer:Identity", "1, 1");
+
             builder.Property(u => u.Name)
                 .IsRequired()
                 .HasMaxLength(100);
@@ -39,12 +42,14 @@ namespace AutoJobApplyDatabase.Entities
             builder.Property(u => u.CvPath)
                 .HasMaxLength(500);
 
-            builder.Property(u => u.EmailCredentialId);
+            builder.Property(u => u.EmailCredentialId)
+                .IsRequired(false);
 
             builder.HasOne(u => u.EmailCredential)
                 .WithOne(e => e.User)
                 .HasForeignKey<EmailCredential>(e => e.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired(false);
         }
     }
 }

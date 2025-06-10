@@ -1,4 +1,5 @@
-﻿using AutoJobApplyDatabase.Entities;
+﻿using AutoJobApplyAPI.Models;
+using AutoJobApplyDatabase.Entities;
 
 namespace AutoJobApplyAPI.Services.Interface
 {
@@ -6,9 +7,10 @@ namespace AutoJobApplyAPI.Services.Interface
     {
         Task<User?> GetByIdAsync(int id);
         Task<User?> GetByEmailAsync(string email);
-        Task<User> CreateUserAsync(User user);
-        Task<bool> UpdateUserAsync(int id, User updatedUser);
-        Task<string?> UploadCVAsync(int id, IFormFile file);
+        Task<User> CreateUserAsync(UserCreateRequest user);
+        Task<bool> UpdateUserAsync(int id, UserCreateRequest updatedUser);
+        Task<string?> UploadCVAsync(int userId, IFormFile file);
+        Task<string?> GetCVPathAsync(int userId);
         Task<bool> ValidatePasswordAsync(int userId, string password);
     }
 }

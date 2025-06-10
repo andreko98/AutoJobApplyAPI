@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace AutoJobApplyDatabase.Entities
 {
-    public class ApiKey : IApiKey
+    public class ExternalApiKey : IExternalApiKey
     {
         public int Id { get; set; }
         public string Provider { get; set; }
-        public string Key { get; set; }
+        public string ApiKey { get; set; }
     }
 }

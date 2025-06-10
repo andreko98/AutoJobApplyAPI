@@ -13,9 +13,9 @@ namespace AutoJobApplyDatabase.Repositories.ApiKey
 
         public string? GetApiKey(string provider)
         {
-            return _context.ApiKeys
+            return _context.ExternalApiKeys
                 .Where(a => a.Provider == provider)
-                .Select(a => a.Key)
+                .Select(a => a.ApiKey)
                 .FirstOrDefault();
         }
     }

@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AutoJobApplyDatabase.Entities
 {
-    public class ApiKeyMap : IEntityTypeConfiguration<ApiKey>
+    public class ExternalApiKeyMap : IEntityTypeConfiguration<ExternalApiKey>
     {
-        public void Configure(EntityTypeBuilder<ApiKey> builder)
+        public void Configure(EntityTypeBuilder<ExternalApiKey> builder)
         {
-            builder.ToTable("ApiKeys");
+            builder.ToTable("ExternalApiKeys");
 
             builder.HasKey(j => j.Id);
 
@@ -15,9 +15,8 @@ namespace AutoJobApplyDatabase.Entities
                 .IsRequired()
                 .HasMaxLength(200);
 
-            builder.Property(j => j.Key)
-                .IsRequired()
-                .HasMaxLength(1000);
+            builder.Property(j => j.ApiKey)
+                .IsRequired();
         }
     }
 }

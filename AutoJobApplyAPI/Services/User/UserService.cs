@@ -1,7 +1,8 @@
-﻿using AutoJobApplyAPI.Services.Interface;
+﻿using AutoJobApplyAPI.Models;
+using AutoJobApplyAPI.Services.Interface;
 using AutoJobApplyDatabase.Entities;
 using AutoJobApplyDatabase.Repositories;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AutoJobApplyAPI.Services
 {
@@ -27,40 +28,70 @@ namespace AutoJobApplyAPI.Services
             return await _userRepository.GetByEmailAsync(email);
         }
 
-        public async Task<User> CreateUserAsync(User user)
+        public async Task<User> CreateUserAsync(UserCreateRequest request)
         {
-            user.Password = _dataProtectionService.Protect(user.Password);
+            try
+            {
+                var user = new User
+                {
+                    Name = request.Name,
+                    LastName = request.LastName,
+                    Email = request.Email,
+                    Password = _dataProtectionService.Protect(request.Password),
+                    DateOfBirth = request.DateOfBirth,
+                    Address = request.Address,
+                    About = request.About,
+                    CvPath = string.Empty,
+                    EmailCredentialId = null
+                };
 
-            return await _userRepository.AddAsync(user);
+                return await _userRepository.AddAsync(user);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
-        public async Task<bool> UpdateUserAsync(int id, User updatedUser)
+        public async Task<bool> UpdateUserAsync(int id, UserCreateRequest request)
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null) return false;
 
-            user.Name = updatedUser.Name;
-            user.LastName = updatedUser.LastName;
-            user.Email = updatedUser.Email;
-            user.Password = _dataProtectionService.Protect(updatedUser.Password);
-            user.DateOfBirth = updatedUser.DateOfBirth;
-            user.Address = updatedUser.Address;
-            user.About = updatedUser.About;
+            user.Name = request.Name;
+            user.LastName = request.LastName;
+            user.Email = request.Email;
 
-            if (!string.IsNullOrEmpty(updatedUser.CvPath))
-                user.CvPath = updatedUser.CvPath;
+            if (!request.Password.IsNullOrEmpty())
+            user.Password = _dataProtectionService.Protect(request.Password);
+
+            user.DateOfBirth = request.DateOfBirth;
+            user.Address = request.Address;
+            user.About = request.About;
 
             await _userRepository.UpdateAsync(user);
             return true;
         }
 
-        public async Task<string?> UploadCVAsync(int id, IFormFile file)
+        public async Task<string?> UploadCVAsync(int userId, IFormFile file)
         {
             if (file.ContentType != "application/pdf")
                 return null;
 
-            var user = await _userRepository.GetByIdAsync(id);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) return null;
+
+            // Apaga o arquivo anterior, se existir
+            if (!string.IsNullOrEmpty(user.CvPath))
+            {
+                var oldFullPath = Path.Combine("Uploads", user.CvPath);
+                if (File.Exists(oldFullPath))
+                {
+                    File.Delete(oldFullPath);
+                }
+                user.CvPath = string.Empty; // Limpa o campo no banco antes de atualizar
+                await _userRepository.UpdateAsync(user);
+            }
 
             var folder = Path.Combine("Uploads", "CV");
             Directory.CreateDirectory(folder);
@@ -76,6 +107,14 @@ namespace AutoJobApplyAPI.Services
             await _userRepository.UpdateAsync(user);
 
             return relativePath;
+        }
+
+        public async Task<string?> GetCVPathAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) return null;
+
+            return user.CvPath;
         }
 
         public async Task<bool> ValidatePasswordAsync(int userId, string password)

@@ -16,7 +16,7 @@ namespace AutoJobApplyAPI.Controllers
             _userService = userService;
         }
 
-        [HttpPost("login")]
+        [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var user = await _userService.GetByEmailAsync(request.Email);

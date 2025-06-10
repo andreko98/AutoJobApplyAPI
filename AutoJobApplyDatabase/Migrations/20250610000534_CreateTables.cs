@@ -12,17 +12,18 @@ namespace AutoJobApplyDatabase.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ApiKeys",
+                name: "EmailCredentials",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Provider = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Key = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Email = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    EncryptedPassword = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ApiKeys", x => x.Id);
+                    table.PrimaryKey("PK_EmailCredentials", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -46,6 +47,20 @@ namespace AutoJobApplyDatabase.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ExternalApiKeys",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Provider = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    ApiKey = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExternalApiKeys", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Jobs",
                 columns: table => new
                 {
@@ -64,25 +79,33 @@ namespace AutoJobApplyDatabase.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    About = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
-                    CvPath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    EmailCredentialId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                });
+            name: "Users",
+            columns: table => new
+            {
+                Id = table.Column<int>(type: "int", nullable: false)
+                    .Annotation("SqlServer:Identity", "1, 1"),
+
+                Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                Email = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                Password = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
+                Address = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
+                About = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
+                CvPath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                EmailCredentialId = table.Column<int>(type: "int", nullable: true)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_Users", x => x.Id);
+
+                table.ForeignKey(
+                    name: "FK_Users_EmailCredentials_EmailCredentialId",
+                    column: x => x.EmailCredentialId,
+                    principalTable: "EmailCredentials",
+                    principalColumn: "Id",
+                    onDelete: ReferentialAction.Cascade);
+            });
 
             migrationBuilder.CreateTable(
                 name: "Applications",
@@ -113,27 +136,6 @@ namespace AutoJobApplyDatabase.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "EmailCredentials",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EncryptedPassword = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EmailCredentials", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_EmailCredentials_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Applications_JobId",
                 table: "Applications",
@@ -143,34 +145,28 @@ namespace AutoJobApplyDatabase.Migrations
                 name: "IX_Applications_UserId",
                 table: "Applications",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_EmailCredentials_UserId",
-                table: "EmailCredentials",
-                column: "UserId",
-                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ApiKeys");
-
-            migrationBuilder.DropTable(
                 name: "Applications");
 
             migrationBuilder.DropTable(
-                name: "EmailCredentials");
+                name: "EmailLogs");
 
             migrationBuilder.DropTable(
-                name: "EmailLogs");
+                name: "ExternalApiKeys");
 
             migrationBuilder.DropTable(
                 name: "Jobs");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "EmailCredentials");
         }
     }
 }

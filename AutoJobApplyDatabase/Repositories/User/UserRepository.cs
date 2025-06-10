@@ -15,7 +15,12 @@ namespace AutoJobApplyDatabase.Repositories
 
         public async Task<User?> GetByIdAsync(int id)
         {
-            return await _context.Users.Include(u => u.EmailCredential).FirstOrDefaultAsync(u => u.Id == id);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user != null)
+            user.Password = string.Empty;
+
+            return user;
         }
 
         public async Task<User?> GetByEmailAsync(string email)
@@ -24,9 +29,18 @@ namespace AutoJobApplyDatabase.Repositories
         }
         public async Task<User> AddAsync(User user)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            return user;
+            try
+            {
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                user.Password = string.Empty;
+                return user;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
         public async Task UpdateAsync(User user)
         {

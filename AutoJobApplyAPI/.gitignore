@@ -1,0 +1,14 @@
+# Ignorar a pasta Uploads
+Uploads/
+
+# Opcional: Ignorar subpastas específicas dentro de Uploads
+Uploads/*
+
+# Opcional: Ignorar todos os arquivos dentro de Uploads sem ignorar a pasta
+Uploads/**
+
+# Outros arquivos que podem ser ignorados em um projeto .NET
+bin/
+obj/
+*.log
+*.temp

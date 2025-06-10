@@ -4,11 +4,12 @@ using AutoJobApplyAPI.Services.Interface;
 using AutoJobApplyDatabase.Context;
 using AutoJobApplyDatabase.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AutoJobApplyAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/Users")]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -23,52 +24,104 @@ namespace AutoJobApplyAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-            var user = await _userService.GetByIdAsync(id);
-            if (user == null) return NotFound();
-            return user;
+            try
+            {
+                var user = await _userService.GetByIdAsync(id);
+                if (user == null) return NotFound();
+                return user;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
-        [HttpPost]
-        public async Task<ActionResult<User>> CreateUser(User user)
+        [HttpPost("CreateUser")]
+        public async Task<ActionResult<User>> CreateUser(UserCreateRequest user)
         {
-            var createdUser = await _userService.CreateUserAsync(user);
-            return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser);
+            try
+            {
+                var createdUser = await _userService.CreateUserAsync(user);
+                return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, User updatedUser)
+        public async Task<IActionResult> UpdateUser(int id, UserCreateRequest updatedUser)
         {
-            if (id != updatedUser.Id) return BadRequest();
+            try
+            {
+                if (id != updatedUser.Id) return BadRequest();
 
-            var updated = await _userService.UpdateUserAsync(id, updatedUser);
-            if (!updated) return NotFound();
+                var updated = await _userService.UpdateUserAsync(id, updatedUser);
+                if (!updated) return NotFound();
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
-        [HttpPost("{id}/uploadCV")]
+        [HttpPost("{id}/UploadCV")]
         public async Task<IActionResult> UploadCV(int id, IFormFile file)
         {
-            var path = await _userService.UploadCVAsync(id, file);
-            if (path == null)
-                return BadRequest("Arquivo inválido ou usuário não encontrado.");
+            try
+            {
+                var path = await _userService.UploadCVAsync(id, file);
+                if (path == null)
+                    return BadRequest("Arquivo inválido ou usuário não encontrado.");
 
-            return Ok(new { path });
+                return Ok(new { path });
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        [HttpGet("{id}/GetCVPath")]
+        public async Task<IActionResult> GetCVPath(int id)
+        {
+            try
+            {
+                var path = await _userService.GetCVPathAsync(id);
+                if (path.IsNullOrEmpty())
+                    return BadRequest("Nenhum currículo encontrado.");
+
+                return Ok(new { path });
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         [HttpPost("SaveEmailCredential")]
         public async Task<IActionResult> SaveEmailCredential(int id, [FromBody] EmailCredentialRequest request)
         {
-            var user = await _userService.GetByIdAsync(id);
-            if (user == null)
-                return NotFound("Usuário não encontrado.");
+            try
+            {
+                var user = await _userService.GetByIdAsync(id);
+                if (user == null)
+                    return NotFound("Usuário não encontrado.");
 
-            var result = await _emailService.SaveEmailCredential(id, request.Email, request.Password);
+                var result = await _emailService.SaveEmailCredential(id, request.Email, request.Password);
 
-            if (result)
-                return Ok("Credencial cadastrada com sucesso.");
-            else
-                return StatusCode(500, "Erro ao cadastrar credencial.");
+                if (result)
+                    return Ok("Credencial cadastrada com sucesso.");
+                else
+                    return StatusCode(500, "Erro ao cadastrar credencial.");
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
     }
 }

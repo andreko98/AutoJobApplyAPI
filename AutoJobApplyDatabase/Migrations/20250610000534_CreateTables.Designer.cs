@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoJobApplyDatabase.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250609011911_CreateTables")]
+    [Migration("20250610000534_CreateTables")]
     partial class CreateTables
     {
         /// <inheritdoc />
@@ -24,27 +24,6 @@ namespace AutoJobApplyDatabase.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("AutoJobApplyDatabase.Entities.ApiKey", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Provider")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ApiKeys");
-                });
 
             modelBuilder.Entity("AutoJobApplyDatabase.Entities.Application", b =>
                 {
@@ -90,21 +69,20 @@ namespace AutoJobApplyDatabase.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("EncryptedPassword")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("EmailCredentials");
+                    b.ToTable("EmailCredentials", (string)null);
                 });
 
             modelBuilder.Entity("AutoJobApplyDatabase.Entities.EmailLog", b =>
@@ -156,6 +134,28 @@ namespace AutoJobApplyDatabase.Migrations
                     b.ToTable("EmailLogs", (string)null);
                 });
 
+            modelBuilder.Entity("AutoJobApplyDatabase.Entities.ExternalApiKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApiKey")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExternalApiKeys", (string)null);
+                });
+
             modelBuilder.Entity("AutoJobApplyDatabase.Entities.Job", b =>
                 {
                     b.Property<int>("Id")
@@ -201,9 +201,8 @@ namespace AutoJobApplyDatabase.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:Identity", "1, 1");
 
                     b.Property<string>("About")
                         .IsRequired()
@@ -228,7 +227,7 @@ namespace AutoJobApplyDatabase.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int>("EmailCredentialId")
+                    b.Property<int?>("EmailCredentialId")
                         .HasColumnType("int");
 
                     b.Property<string>("LastName")
@@ -243,8 +242,8 @@ namespace AutoJobApplyDatabase.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.HasKey("Id");
 
@@ -270,21 +269,20 @@ namespace AutoJobApplyDatabase.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AutoJobApplyDatabase.Entities.EmailCredential", b =>
+            modelBuilder.Entity("AutoJobApplyDatabase.Entities.User", b =>
                 {
-                    b.HasOne("AutoJobApplyDatabase.Entities.User", "User")
-                        .WithOne("EmailCredential")
-                        .HasForeignKey("AutoJobApplyDatabase.Entities.EmailCredential", "UserId")
+                    b.HasOne("AutoJobApplyDatabase.Entities.EmailCredential", "EmailCredential")
+                        .WithOne("User")
+                        .HasForeignKey("AutoJobApplyDatabase.Entities.User", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("EmailCredential");
                 });
 
-            modelBuilder.Entity("AutoJobApplyDatabase.Entities.User", b =>
+            modelBuilder.Entity("AutoJobApplyDatabase.Entities.EmailCredential", b =>
                 {
-                    b.Navigation("EmailCredential")
-                        .IsRequired();
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
