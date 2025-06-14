@@ -24,22 +24,34 @@ namespace AutoJobApplyDatabase.Repositories
                 .FirstOrDefault(e => e.UserId == userId);
         }
 
-        public async Task SaveEmailCredentialAsync(EmailCredential credential)
+        public bool SaveEmailCredential(EmailCredential credential)
         {
-            var existing = _context.EmailCredentials.FirstOrDefault(e => e.UserId == credential.UserId);
+            var saveCredential = _context.EmailCredentials.FirstOrDefault(e => e.UserId == credential.UserId);
 
-            if (existing == null)
+            if (saveCredential == null)
             {
                 _context.EmailCredentials.Add(credential);
+                _context.SaveChanges();
+
+                saveCredential = _context.EmailCredentials.FirstOrDefault(e => e.UserId == credential.UserId);
+
+                var user = _context.Users.FirstOrDefault(u => u.Id == credential.UserId);
+
+                if (user != null)
+                {
+                    user.EmailCredentialId = saveCredential!.Id;
+                }
             }
             else
             {
-                existing.Email = credential.Email;
-                existing.EncryptedPassword = credential.EncryptedPassword;
-                _context.EmailCredentials.Update(existing);
+                saveCredential.Email = credential.Email;
+                saveCredential.EncryptedPassword = credential.EncryptedPassword;
+                _context.EmailCredentials.Update(saveCredential);
             }
 
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
+
+            return true;
         }
     }
 }

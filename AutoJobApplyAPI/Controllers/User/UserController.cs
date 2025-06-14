@@ -103,15 +103,15 @@ namespace AutoJobApplyAPI.Controllers
         }
 
         [HttpPost("SaveEmailCredential")]
-        public async Task<IActionResult> SaveEmailCredential(int id, [FromBody] EmailCredentialRequest request)
+        public async Task<IActionResult> SaveEmailCredential([FromBody] EmailCredentialRequest request)
         {
             try
             {
-                var user = await _userService.GetByIdAsync(id);
+                var user = await _userService.GetByIdAsync(request.UserId);
                 if (user == null)
                     return NotFound("Usuário não encontrado.");
 
-                var result = await _emailService.SaveEmailCredential(id, request.Email, request.Password);
+                var result = _emailService.SaveEmailCredential(request);
 
                 if (result)
                     return Ok("Credencial cadastrada com sucesso.");

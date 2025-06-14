@@ -6,6 +6,6 @@ namespace AutoJobApplyDatabase.Repositories
     {
         Task AddAsync(EmailLog log);
         EmailCredential? GetEmailCredential(int userId);
-        Task SaveEmailCredentialAsync(EmailCredential credential);
+        bool SaveEmailCredential(EmailCredential credential);
     }
 }

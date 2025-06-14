@@ -35,7 +35,6 @@ namespace AutoJobApplyAPI.Services
 
                 // Descriptografa o email e senha
                 var senderEmail = _dataProtectionService.Unprotect(credential.Email);
-                var senderPassword = _dataProtectionService.Unprotect(credential.EncryptedPassword);
 
                 var tasks = _settings.EmailPatterns.Select(async pattern =>
                 {
@@ -65,14 +64,12 @@ namespace AutoJobApplyAPI.Services
                         if (!string.IsNullOrEmpty(attachmentPath))
                             mail.Attachments.Add(new Attachment(attachmentPath));
 
-                        using var smtp = new SmtpClient(_settings.SmtpHost)
+                        await new SmtpClient(_settings.SmtpHost)
                         {
                             Port = _settings.SmtpPort,
-                            Credentials = new NetworkCredential(senderEmail, senderPassword),
+                            Credentials = new NetworkCredential(senderEmail, _dataProtectionService.Unprotect(credential.EncryptedPassword)),
                             EnableSsl = true
-                        };
-
-                        await smtp.SendMailAsync(mail);
+                        }.SendMailAsync(mail);
 
                         emailLog.Status = EmailStatus.Enviado;
                         emailLog.Message = "E-mail enviado com sucesso.";
@@ -97,22 +94,31 @@ namespace AutoJobApplyAPI.Services
             }
         }
 
-        public async Task<bool> SaveEmailCredential(int userId, string email, string password)
+        public bool SaveEmailCredential(EmailCredentialRequest request)
         {
-            // Criptografa email e senha
-            var encryptedEmail = _dataProtectionService.Protect(email);
-            var encryptedPassword = _dataProtectionService.Protect(password);
-
-            var credential = new EmailCredential
+            try
             {
-                Email = encryptedEmail,
-                EncryptedPassword = encryptedPassword,
-                UserId = userId
-            };
+                // Criptografa email e senha
+                var encryptedEmail = _dataProtectionService.Protect(request.Email);
+                var encryptedPassword = _dataProtectionService.Protect(request.Password);
 
-            // Salva no repositório
-            await _emailRepository.SaveEmailCredentialAsync(credential);
-            return true;
+                var credential = new EmailCredential
+                {
+                    Email = encryptedEmail,
+                    EncryptedPassword = encryptedPassword,
+                    UserId = request.UserId
+                };
+
+                // Salva no repositório
+                _emailRepository.SaveEmailCredential(credential);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao cadastrar credencial: {ex.Message}");
+                return false;
+            }
         }
     }
 }

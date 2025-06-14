@@ -3,7 +3,7 @@ using AutoJobApplyDatabase.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/Jobs")]
 public class JobController : ControllerBase
 {
     private readonly IJobService _jobService;
@@ -20,14 +20,14 @@ public class JobController : ControllerBase
         return Ok(jobs);
     }
 
-    [HttpPost("scrape/{search}")]
+    [HttpPost("Scrape/{search}")]
     public async Task<ActionResult> Scrape(string search)
     {
         var total = await _jobService.ScrapeJobsAsync(search);
         return Ok(new { total });
     }
 
-    [HttpGet("recent/{count}")]
+    [HttpGet("Recent/{count}")]
     public async Task<ActionResult<IEnumerable<Job>>> GetRecentJobs(int count = 10)
     {
         var jobs = await _jobService.GetRecentJobsAsync(count);
